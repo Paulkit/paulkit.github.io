@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Simple Map</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+ 
+
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans" rel="stylesheet">
+  <style>
+ 
+body{
+    font-family: 'Noto Sans', sans-serif;
+
+}
+#map { 
+ height: 100%; 
+ width: 100%; 
+ position:absolute; 
+ top: 0; 
+ left: 0; 
+ z-index: 0; /* Set z-index to 0 as it will be on a layer below the contact form */
+}
+#over_map { position: absolute; top: 10px; left: 10px; z-index: 99; }
+    </style>
+  </head>
+  <body>
+ 
+  <div id="map" style="height: 100%;width: 100%;"></div>
+    
+ 
+    <div id="over_map">
+        <p><button id="districts" class="btn btn-primary" href="#" role="button">18 districts »</button></p>
+
+       <p><button id="grayout" class="btn btn-primary" href="#" role="button">Gray out area outside HK »</button></p>
+         
+    </div>
+    
+ 
+ 
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script type='text/javascript' src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script> 
+  <script>
+    var map; // init in here
+    var baseCenterPoint; // init in basemap.js
+    var currentZoom = 12;
+    var district_layer; // init in 18district.js
+
+function initMap() {
+    
+    map = new google.maps.Map(document.getElementById('map'), {
+      center: {lat: 22.363358, lng: 114.136615},
+      zoom: 10,
+      zoomControl: false,
+      mapTypeControl: false,
+      scaleControl: false,
+      streetViewControl: false,
+      rotateControl: false,
+      fullscreenControl: false , 
+  styles:
+[
+  {
+      "featureType": "all",
+      "elementType": "labels.text",
+      "stylers": [
+          {
+              "visibility": "off"
+          }
+      ]
+  },
+  {
+      "featureType": "all",
+      "elementType": "labels.icon",
+      "stylers": [
+          {
+              "visibility": "off"
+          }
+      ]
+  },
+  {
+      "featureType": "administrative",
+      "elementType": "all",
+      "stylers": [
+          {
+              "visibility": "on"
+          }
+      ]
+  },
+  {
+      "featureType": "administrative",
+      "elementType": "labels.text",
+      "stylers": [
+          {
+              "visibility": "off"
+          }
+      ]
+  },
+  {
+      "featureType": "administrative.country",
+      "elementType": "geometry.stroke",
+      "stylers": [
+          {
+              "visibility": "on"
+          }
+      ]
+  },
+  {
+      "featureType": "administrative.province",
+      "elementType": "labels.text",
+      "stylers": [
+          {
+              "visibility": "off"
+          }
+      ]
+  },
+  {
+      "featureType": "administrative.locality",
+      "elementType": "labels.text",
+      "stylers": [
+          {
+              "visibility": "off"
+          }
+      ]
+  },
+  {
+      "featureType": "administrative.neighborhood",
+      "elementType": "labels.text",
+      "stylers": [
+          {
+              "visibility": "off"
+          }
+      ]
+  },
+  {
+      "featureType": "administrative.land_parcel",
+      "elementType": "labels.text",
+      "stylers": [
+          {
+              "visibility": "off"
+          }
+      ]
+  },
+  {
+      "featureType": "landscape",
+      "elementType": "labels.text",
+      "stylers": [
+          {
+              "visibility": "off"
+          }
+      ]
+  },
+  {
+      "featureType": "landscape.man_made",
+      "elementType": "labels.text",
+      "stylers": [
+          {
+              "visibility": "off"
+          }
+      ]
+  },
+  {
+      "featureType": "landscape.natural",
+      "elementType": "labels.text",
+      "stylers": [
+          {
+              "visibility": "off"
+          }
+      ]
+  },
+  {
+      "featureType": "poi",
+      "elementType": "labels.text",
+      "stylers": [
+          {
+              "visibility": "off"
+          }
+      ]
+  },
+  {
+      "featureType": "road",
+      "elementType": "geometry.stroke",
+      "stylers": [
+          {
+              "visibility": "off"
+          }
+      ]
+  },
+  {
+      "featureType": "road",
+      "elementType": "labels.text",
+      "stylers": [
+          {
+              "visibility": "off"
+          }
+      ]
+  },
+  {
+      "featureType": "road",
+      "elementType": "labels.icon",
+      "stylers": [
+          {
+              "visibility": "off"
+          }
+      ]
+  },
+  {
+      "featureType": "transit",
+      "elementType": "labels.text",
+      "stylers": [
+          {
+              "visibility": "off"
+          }
+      ]
+  },
+  {
+      "featureType": "transit.station",
+      "elementType": "labels.text",
+      "stylers": [
+          {
+              "visibility": "off"
+          }
+      ]
+  },
+  {
+      "featureType": "water",
+      "elementType": "geometry.fill",
+      "stylers": [
+          {
+              "color": "#ffffff"
+          }
+      ]
+  },
+  {
+      "featureType": "water",
+      "elementType": "geometry.stroke",
+      "stylers": [
+          {
+              "visibility": "off"
+          },
+          {
+              "color": "#ffffff"
+          }
+      ]
+  },
+  {
+      "featureType": "water",
+      "elementType": "labels.text",
+      "stylers": [
+          {
+              "visibility": "off"
+          }
+      ]
+  }
+]
+    });   
+     map.setOptions({ minZoom: 10, maxZoom: 12 ,});
+   
+     
+
+  jQuery.when(
+      jQuery.get('/js/basemap.js')  ,
+      jQuery.get('/js/18district.js')  
+  ).done(function () {
+ 
+});
+}
+
+
+ 
+
+$( "#districts" ).on( "click", function() {
+    districts_setup(); 
+});
+
+$( "#grayout" ).on( "click", function() {
+     gray_out_setup();
+ 
+
+});
+
+
+</script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC42FWVuFclawG_ujrXok44nC7UaY-vGDs&callback=initMap"
+async defer></script>
+  </body>
+</html>
+
+
